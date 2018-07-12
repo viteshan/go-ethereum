@@ -105,6 +105,7 @@ func NewProtocolManager(networkId int, mux *event.TypeMux, txpool txPool, pow po
 			Version: version,
 			Length:  ProtocolLengths[i],
 			Run: func(p *p2p.Peer, rw p2p.MsgReadWriter) error {
+				// @viteshan 某个协议的peer
 				peer := manager.newPeer(int(version), networkId, p, rw)
 				manager.newPeerCh <- peer
 				return manager.handle(peer)
@@ -179,6 +180,7 @@ func (pm *ProtocolManager) newPeer(pv, nv int, p *p2p.Peer, rw p2p.MsgReadWriter
 
 // handle is the callback invoked to manage the life cycle of an eth peer. When
 // this function terminates, the peer is disconnected.
+// @viteshan 当协议栈启动的时候，这个方法会启动，然后会一直处理来自peer的消息
 func (pm *ProtocolManager) handle(p *peer) error {
 	glog.V(logger.Debug).Infof("%v: peer connected [%s]", p, p.Name())
 
@@ -206,6 +208,7 @@ func (pm *ProtocolManager) handle(p *peer) error {
 
 	// main loop. handle incoming messages.
 	for {
+		// @viteshan loop 一直处理消息
 		if err := pm.handleMsg(p); err != nil {
 			glog.V(logger.Debug).Infof("%v: message handling failed: %v", p, err)
 			return err
@@ -271,6 +274,7 @@ func (pm *ProtocolManager) handleMsg(p *peer) error {
 		hashes := []common.Hash{last.Hash()}
 		hashes = append(hashes, pm.chainman.GetBlockHashesFromHash(last.Hash(), request.Amount-1)...)
 
+		// @viteshan 逆序
 		for i := 0; i < len(hashes)/2; i++ {
 			hashes[i], hashes[len(hashes)-1-i] = hashes[len(hashes)-1-i], hashes[i]
 		}

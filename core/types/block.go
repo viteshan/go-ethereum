@@ -57,12 +57,14 @@ type Header struct {
 	ReceiptHash common.Hash    // Receipt sha
 	Bloom       Bloom          // Bloom
 	Difficulty  *big.Int       // Difficulty for the current block
+	// @viteshan 区块高度
 	Number      *big.Int       // The block number
 	GasLimit    *big.Int       // Gas limit
 	GasUsed     *big.Int       // Gas used
 	Time        uint64         // Creation time
 	Extra       []byte         // Extra data
 	MixDigest   common.Hash    // for quick difficulty verification
+	// @viteshan pow
 	Nonce       BlockNonce
 }
 
@@ -129,6 +131,7 @@ type Block struct {
 
 	// Td is used by package core to store the total difficulty
 	// of the chain up to and including the block.
+	// @viteshan 一条链条的总困难度
 	Td *big.Int
 
 	// ReceivedAt is used by package eth to track block propagation time.

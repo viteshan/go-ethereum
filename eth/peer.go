@@ -52,6 +52,7 @@ type peer struct {
 	id string
 
 	head common.Hash
+	// @viteshan td的含义是这条链条的总困难度
 	td   *big.Int
 	lock sync.RWMutex
 
@@ -142,6 +143,7 @@ func (p *peer) SendBlockHashes(hashes []common.Hash) error {
 	reqHashOutPacketsMeter.Mark(1)
 	reqHashOutTrafficMeter.Mark(int64(32 * len(hashes)))
 
+	// @viteshan 见protoRW
 	return p2p.Send(p.rw, BlockHashesMsg, hashes)
 }
 

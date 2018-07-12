@@ -263,12 +263,15 @@ func (d *Downloader) synchronise(id string, hash common.Hash) error {
 		return d.synchroniseMock(id, hash)
 	}
 	// Make sure only one goroutine is ever allowed past this point at once
+	// @viteshan compareAndSet 无锁检测
 	if !atomic.CompareAndSwapInt32(&d.synchronising, 0, 1) {
 		return errBusy
 	}
 	defer atomic.StoreInt32(&d.synchronising, 0)
 
 	// If the head hash is banned, terminate immediately
+	// ?@viteshan 什么场景下会出现bannedHash
+	// 1. 参看core.BadHashes,实现硬分叉功能
 	if d.banned.Has(hash) {
 		return errBannedHead
 	}

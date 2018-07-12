@@ -133,11 +133,14 @@ func (pm *ProtocolManager) syncer() {
 	defer pm.downloader.Terminate()
 
 	// Wait for different events to fire synchronisation operations
+
+	// @viteshan 每10s进行一次强制同步
 	forceSync := time.Tick(forceSyncCycle)
 	for {
 		select {
 		case <-pm.newPeerCh:
 			// Make sure we have peers to select from, then sync
+			// @viteshan 至少找到N个peer才会开启同步
 			if pm.peers.Len() < minDesiredPeerCount {
 				break
 			}

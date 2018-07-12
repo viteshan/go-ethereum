@@ -237,6 +237,7 @@ func (p *Peer) handle(msg Msg) error {
 		return msg.Discard()
 	default:
 		// it's a subprotocol message
+		// @viteshan 对消息进行转发
 		proto, err := p.getProto(msg.Code)
 		if err != nil {
 			return fmt.Errorf("msg code out of range: %v", msg.Code)

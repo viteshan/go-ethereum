@@ -395,8 +395,8 @@ func New(config *Config) (*Ethereum, error) {
 	eth.net = &p2p.Server{
 		PrivateKey:      netprv,
 		Name:            config.Name,
-		MaxPeers:        config.MaxPeers,
-		MaxPendingPeers: config.MaxPendingPeers,
+		MaxPeers:        config.MaxPeers, //  @viteshan 一个节点支持的最大连接数
+		MaxPendingPeers: config.MaxPendingPeers, // @viteshan 一个节点正在建立连接的最大连接数
 		Discovery:       config.Discovery,
 		Protocols:       protocols,
 		NAT:             config.NAT,

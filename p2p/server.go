@@ -569,6 +569,7 @@ func (srv *Server) listenLoop() {
 
 		glog.V(logger.Debug).Infof("Accepted conn %v\n", mfd.RemoteAddr())
 		go func() {
+			// @viteshan 对于每个链接，新开协程处理
 			srv.setupConn(mfd, inboundConn, nil)
 			slots <- struct{}{}
 		}()
@@ -619,6 +620,7 @@ func (srv *Server) setupConn(fd net.Conn, flags connFlag, dialDest *discover.Nod
 		return
 	}
 	c.caps, c.name = phs.Caps, phs.Name
+	// @viteshan 协程间通信, addpeer <-
 	if err := srv.checkpoint(c, srv.addpeer); err != nil {
 		glog.V(logger.Debug).Infof("%v failed checkpoint addpeer: %v", c, err)
 		c.close(err)
