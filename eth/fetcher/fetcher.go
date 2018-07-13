@@ -152,6 +152,7 @@ func (f *Fetcher) Stop() {
 
 // Notify announces the fetcher of the potential availability of a new block in
 // the network.
+// @viteshan 当有新block来了
 func (f *Fetcher) Notify(peer string, hash common.Hash, time time.Time, fetcher blockRequesterFn) error {
 	block := &announce{
 		hash:   hash,
@@ -249,6 +250,7 @@ func (f *Fetcher) loop() {
 			announceMeter.Mark(1)
 
 			count := f.announces[notification.origin] + 1
+			// ?@viteshan 对每个节点有限制吗？
 			if count > hashLimit {
 				glog.V(logger.Debug).Infof("Peer %s: exceeded outstanding announces (%d)", notification.origin, hashLimit)
 				break

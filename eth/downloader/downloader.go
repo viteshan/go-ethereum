@@ -1169,6 +1169,7 @@ func (d *Downloader) process() {
 
 // DeliverBlocks injects a new batch of blocks received from a remote node.
 // This is usually invoked through the BlocksMsg by the protocol handler.
+// @viteshan 处理来自远程节点的blocks
 func (d *Downloader) DeliverBlocks(id string, blocks []*types.Block) error {
 	// Make sure the downloader is active
 	if atomic.LoadInt32(&d.synchronising) == 0 {
@@ -1180,6 +1181,7 @@ func (d *Downloader) DeliverBlocks(id string, blocks []*types.Block) error {
 	d.cancelLock.RUnlock()
 
 	select {
+	// ?@viteshan blockCh被很多地方使用了，怎么保证通道事件传递是ok的？
 	case d.blockCh <- blockPack{id, blocks}:
 		return nil
 
@@ -1202,6 +1204,7 @@ func (d *Downloader) DeliverHashes(id string, hashes []common.Hash) error {
 	d.cancelLock.RUnlock()
 
 	select {
+	// ?@viteshan hashCh被很多地方使用，怎么保证通道事件传递是正确的？
 	case d.hashCh <- hashPack{id, hashes}:
 		return nil
 
