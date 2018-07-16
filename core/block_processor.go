@@ -403,6 +403,7 @@ func ValidateHeader(pow pow.PoW, block *types.Header, parent *types.Block, check
 
 	num := parent.Number()
 	num.Sub(block.Number, num)
+	// @viteshan 验证了number需要递增
 	if num.Cmp(big.NewInt(1)) != 0 {
 		return BlockNumberErr
 	}

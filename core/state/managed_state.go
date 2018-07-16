@@ -27,7 +27,7 @@ type account struct {
 	nstart      uint64
 	nonces      []bool
 }
-
+// ?@viteshan 维护accountNonce数据?
 type ManagedState struct {
 	*StateDB
 

@@ -37,8 +37,10 @@ type StateDB struct {
 	trie *trie.SecureTrie
 	root common.Hash
 
+	// ?@viteshan k: address of account, v:?
 	stateObjects map[string]*StateObject
 
+	// ?@viteshan refund代表什么？
 	refund *big.Int
 
 	thash, bhash common.Hash

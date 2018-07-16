@@ -68,6 +68,11 @@ type ChainManager struct {
 	chainmu sync.RWMutex
 	tsmu    sync.RWMutex
 
+	/**
+	@viteshan checkpoint和LastBlock配合使用, 都存储在blockDb, key分别是"checkpoint"和"LastBlock"
+	@viteshan "LastBlock"是每次插入都进行更新, "checkpoint"是每200次插入进行更新
+	@viteshan 当setLastState时, 优先使用"LastBlock", 如果不存在, 使用"checkpoint"
+	*/
 	checkpoint      int // checkpoint counts towards the new checkpoint
 	td              *big.Int
 	currentBlock    *types.Block
@@ -88,6 +93,7 @@ type ChainManager struct {
 	pow pow.PoW
 }
 
+// @viteshan 核心主链条
 func NewChainManager(genesis *types.Block, blockDb, stateDb, extraDb common.Database, pow pow.PoW, mux *event.TypeMux) (*ChainManager, error) {
 	cache, _ := lru.New(blockCacheLimit)
 	bc := &ChainManager{
@@ -116,6 +122,7 @@ func NewChainManager(genesis *types.Block, blockDb, stateDb, extraDb common.Data
 			if block == nil {
 				glog.Fatal("Unable to complete. Parent block not found. Corrupted DB?")
 			}
+			// @viteshan reorg
 			bc.SetHead(block)
 
 			glog.V(logger.Error).Infoln("Chain reorg was successfull. Resuming normal operation")
@@ -127,6 +134,7 @@ func NewChainManager(genesis *types.Block, blockDb, stateDb, extraDb common.Data
 	bc.txState = state.ManageState(bc.State().Copy())
 
 	bc.futureBlocks, _ = lru.New(maxFutureBlocks)
+	// @viteshan 预热bc.cache
 	bc.makeCache()
 
 	go bc.update()
@@ -226,6 +234,8 @@ func (bc *ChainManager) recover() bool {
 	return false
 }
 
+// ?@viteshan 不知道这个是做什么用的
+// @viteshan 每次发生reorg时, 这个方法会被调用
 func (bc *ChainManager) setLastState() {
 	data, _ := bc.blockDb.Get([]byte("LastBlock"))
 	if len(data) != 0 {
@@ -344,6 +354,7 @@ func (bc *ChainManager) insert(block *types.Block) {
 	}
 
 	bc.checkpoint++
+	// @viteshan 每200块做一次checkpoint
 	if bc.checkpoint > checkpointLimit {
 		err = bc.blockDb.Put([]byte("checkpoint"), block.Hash().Bytes())
 		if err != nil {
@@ -600,6 +611,7 @@ func (self *ChainManager) InsertChain(chain types.Blocks) (int, error) {
 
 		// Call in to the block processor and check for errors. It's likely that if one block fails
 		// all others will fail too (unless a known block is returned).
+		// @viteshan 这里面验证了block.Number需要递增
 		logs, receipts, err := self.processor.Process(block)
 		if err != nil {
 			if IsKnownBlockErr(err) {
