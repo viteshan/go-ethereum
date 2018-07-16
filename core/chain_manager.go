@@ -628,6 +628,8 @@ func (self *ChainManager) InsertChain(chain types.Blocks) (int, error) {
 				}
 
 				self.futureBlocks.Add(block.Hash(), block)
+				// ?@viteshan 如果是从futureBlocks来的insert, 会不会重复++, 导致queued的计算不准？
+				// @viteshan 这个地方要不要判断add结果之后再选择queued++
 				stats.queued++
 				continue
 			}
