@@ -40,6 +40,7 @@ const (
 	BlockChainVersion = 3
 )
 
+// @viteshan insert block时需要对block进行验证，这个时候调用Process方法
 type BlockProcessor struct {
 	db      common.Database
 	extraDb common.Database
@@ -83,6 +84,7 @@ func (sm *BlockProcessor) TransitionState(statedb *state.StateDB, parent, block 
 	return receipts, nil
 }
 
+// ?@viteshan 这个方法好像只起到了生成receipt的作用?
 func (self *BlockProcessor) ApplyTransaction(coinbase *state.StateObject, statedb *state.StateDB, header *types.Header, tx *types.Transaction, usedGas *big.Int, transientProcess bool) (*types.Receipt, *big.Int, error) {
 	// If we are mining this block and validating we want to set the logs back to 0
 

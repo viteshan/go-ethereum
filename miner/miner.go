@@ -78,7 +78,8 @@ out:
 			atomic.StoreInt32(&self.canStart, 1)
 			atomic.StoreInt32(&self.shouldStart, 0)
 			if shouldStart {
-				self.Start(self.coinbase, self.threads)
+				self.
+					Start(self.coinbase, self.threads)
 			}
 			// unsubscribe. we're only interested in this event once
 			events.Unsubscribe()

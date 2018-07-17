@@ -93,7 +93,7 @@ type ChainManager struct {
 	pow pow.PoW
 }
 
-// @viteshan 核心主链条
+// @viteshan 核心主链条管理, 主要功能是insert(可以解决分叉), 同时提供了一个futureBlocks, 并定期尝试写入.
 func NewChainManager(genesis *types.Block, blockDb, stateDb, extraDb common.Database, pow pow.PoW, mux *event.TypeMux) (*ChainManager, error) {
 	cache, _ := lru.New(blockCacheLimit)
 	bc := &ChainManager{
@@ -673,6 +673,7 @@ func (self *ChainManager) InsertChain(chain types.Blocks) (int, error) {
 			queue[i] = ChainSideEvent{block, logs}
 			queueEvent.sideCount++
 		case SplitStatTy:
+			// @viteshan 分叉事件触发
 			queue[i] = ChainSplitEvent{block, logs}
 			queueEvent.splitCount++
 		}
@@ -685,6 +686,7 @@ func (self *ChainManager) InsertChain(chain types.Blocks) (int, error) {
 		glog.Infof("imported %d block(s) (%d queued %d ignored) including %d txs in %v. #%v [%x / %x]\n", stats.processed, stats.queued, stats.ignored, txcount, tend, end.Number(), start.Hash().Bytes()[:4], end.Hash().Bytes()[:4])
 	}
 
+	// @viteshan 将插入过程中的事件广播出去
 	go self.eventMux.Post(queueEvent)
 
 	return 0, nil

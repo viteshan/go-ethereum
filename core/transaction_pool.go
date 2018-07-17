@@ -106,6 +106,7 @@ func (pool *TxPool) eventLoop() {
 	}
 }
 
+// ?@viteshan  what?
 func (pool *TxPool) resetState() {
 	pool.pendingState = state.ManageState(pool.currentState())
 
@@ -389,6 +390,7 @@ func (pool *TxPool) checkQueue() {
 		trueNonce := pool.currentState().GetNonce(address)
 		addq := addq[:0]
 		for hash, tx := range txs {
+			// @viteshan 比块链中的最新Nonce小, 说明是无效tx, 直接删除
 			if tx.Nonce() < trueNonce {
 				// Drop queued transactions whose nonce is lower than
 				// the account nonce because they have been processed.
@@ -403,11 +405,12 @@ func (pool *TxPool) checkQueue() {
 		sort.Sort(addq)
 		for i, e := range addq {
 			// start deleting the transactions from the queue if they exceed the limit
+			// @viteshan 每个账户最多64个
 			if i > maxQueued {
 				delete(pool.queue[address], e.hash)
 				continue
 			}
-
+			//
 			if e.Nonce() > guessedNonce {
 				if len(addq)-i > maxQueued {
 					if glog.V(logger.Debug) {
@@ -419,6 +422,7 @@ func (pool *TxPool) checkQueue() {
 				}
 				break
 			}
+			// @viteshan 将小于pendingMaxNonce和大于lastestNonce的数据写入pool中
 			delete(txs, e.hash)
 			pool.addTx(e.hash, address, e.Transaction)
 		}
@@ -430,6 +434,7 @@ func (pool *TxPool) checkQueue() {
 }
 
 // validatePool removes invalid and processed transactions from the main pool.
+// @viteshan 删除pending中nonce比当前账户nonce小的Tx
 func (pool *TxPool) validatePool() {
 	state := pool.currentState()
 	for hash, tx := range pool.pending {
