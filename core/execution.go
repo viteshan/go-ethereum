@@ -52,6 +52,7 @@ func (self *Execution) Create(caller vm.ContextRef) (ret []byte, err error, acco
 	// Input must be nil for create
 	code := self.input
 	self.input = nil
+	// @viteshan 创建账户在exec方法中
 	ret, err = self.exec(nil, code, caller)
 	// Here we get an error if we run into maximum stack depth,
 	// See: https://github.com/ethereum/yellowpaper/pull/131
@@ -91,6 +92,7 @@ func (self *Execution) exec(contextAddr *common.Address, code []byte, caller vm.
 		to   *state.StateObject
 	)
 	if createAccount {
+		// @viteshan 这个地方即创建合约账户
 		to = env.State().CreateAccount(*self.address)
 	} else {
 		to = env.State().GetOrNewStateObject(*self.address)

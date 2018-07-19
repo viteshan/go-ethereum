@@ -208,11 +208,14 @@ func (self *StateTransition) transitionState() (ret []byte, usedGas *big.Int, er
 	vmenv := self.env
 	var ref vm.ContextRef
 	if MessageCreatesContract(msg) {
+		// @viteshan ref is stateObject
+		// @viteshan 在Create方法中，已经将stateObject写入到stateDB中了, 同时创建了account
 		ret, err, ref = vmenv.Create(sender, self.data, self.gas, self.gasPrice, self.value)
 		if err == nil {
 			dataGas := big.NewInt(int64(len(ret)))
 			dataGas.Mul(dataGas, params.CreateDataGas)
 			if err := self.UseGas(dataGas); err == nil {
+				// @viteshan 当账户创建的时候, 将code插入到stateObject中
 				ref.SetCode(ret)
 			} else {
 				ret = nil // does not affect consensus but useful for StateTests validations
