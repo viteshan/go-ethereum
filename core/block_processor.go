@@ -262,6 +262,7 @@ func (sm *BlockProcessor) processWithParent(block, parent *types.Block) (logs st
 
 	// Commit state objects/accounts to a temporary trie (does not save)
 	// used to calculate the state root.
+	// @viteshan 这个地方会最终导致self.trie.hash()的变更
 	state.SyncObjects()
 	if header.Root != state.Root() {
 		err = fmt.Errorf("invalid merkle root. received=%x got=%x", header.Root, state.Root())

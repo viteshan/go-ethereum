@@ -45,8 +45,9 @@ func GenesisBlock(nonce uint64, db common.Database) *types.Block {
 		accountState := statedb.CreateAccount(common.BytesToAddress(codedAddr))
 		accountState.SetBalance(common.Big(account.Balance))
 		accountState.SetCode(common.FromHex(account.Code))
-		statedb.UpdateStateObject(accountState)
+		statedb.SetStateObject(accountState)
 	}
+	statedb.SyncObjects()
 	statedb.Sync()
 
 	block := types.NewBlock(&types.Header{

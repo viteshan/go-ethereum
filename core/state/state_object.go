@@ -57,6 +57,7 @@ func (self Storage) Copy() Storage {
 type StateObject struct {
 	// State database for storing state changes
 	db   common.Database
+	// @viteshan 代表是存储中的内容, key为storage.key, value为storage.value   storage.value是hash类型
 	trie *trie.SecureTrie
 
 	// Address belonging to this account
@@ -72,6 +73,7 @@ type StateObject struct {
 	// Temporarily initialisation code
 	initCode Code
 	// Cached storage (flushed when updated)
+	// @viteshan value是hash, value是bigToHash
 	storage Storage
 
 	// Total gas pool is the total amount of gas currently

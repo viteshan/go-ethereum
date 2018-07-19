@@ -32,19 +32,56 @@ import (
 // nested states. It's the general query interface to retrieve:
 // * Contracts
 // * Accounts
+/**
+@viteshan StateDB的结构
+
+1. stateObjects map[string]*StateObject
+2. trie *trie.SecureTrie
+3. db   common.Database
+
+以上三者构成了三级存储;
+是存储而不是缓存原因是三级存储的数据不完全一致;
+
+1. stateObjects存储有过变动的数据(有些类似lazy load的方式);
+2. trie中存储rlp{nonce, balance, Root, CodeHash}
+3. db中存储code
+
+以下是StateObjects的初始化过程:
+
+object := &StateObject{address: address, db: db}
+object.nonce = extobject.Nonce					// from trie
+object.balance = extobject.Balance				// from trie
+object.codeHash = extobject.CodeHash			// from trie
+object.trie = trie.NewSecure(extobject.Root[:], db)   // from trie
+object.storage = make(map[string]common.Hash)   // Init
+object.gasPool = new(big.Int)                   // init
+object.code, _ = db.Get(extobject.CodeHash)     // from db
+
+
+ */
 type StateDB struct {
+	// @viteshan key:codehash value:stateObject.code
 	db   common.Database
+	// @viteshan 这里面存储的是账户的状态, key:address  value:stateObject.rlp
 	trie *trie.SecureTrie
+	// ?@viteshan parent.root
+	// ?@viteshan 既然已经有了Root()方法，为什么还要有root字段？
+	// @viteshan 目的可能是为了保存初始快照
 	root common.Hash
 
-	// ?@viteshan k: address of account, v:?
+	// @viteshan k:address of account, v:db和trie的缓存
+	// @viteshan 通过lazy load的方式进行加载
 	stateObjects map[string]*StateObject
 
 	// ?@viteshan refund代表什么？
 	refund *big.Int
 
+	// @viteshan thash means tx hash
+	// @viteshan bhash means block hash
 	thash, bhash common.Hash
+	// @viteshan txIndex 在block中第几个tx
 	txIndex      int
+	// @viteshan  key:thash  value:[]Log
 	logs         map[common.Hash]Logs
 }
 
@@ -64,6 +101,7 @@ func (self *StateDB) StartRecord(thash, bhash common.Hash, ti int) {
 	self.txIndex = ti
 }
 
+// @viteshan tx执行时的log
 func (self *StateDB) AddLog(log *Log) {
 	log.TxHash = self.thash
 	log.BlockHash = self.bhash
@@ -189,7 +227,7 @@ func (self *StateDB) Delete(addr common.Address) bool {
 //
 
 // Update the given state object and apply it to state trie
-func (self *StateDB) UpdateStateObject(stateObject *StateObject) {
+func (self *StateDB) updateStateObject(stateObject *StateObject) {
 	//addr := stateObject.Address()
 
 	if len(stateObject.CodeHash()) > 0 {
@@ -354,13 +392,16 @@ func (self *StateDB) SyncIntermediate() {
 			} else {
 				stateObject.Update()
 
-				self.UpdateStateObject(stateObject)
+				self.updateStateObject(stateObject)
 			}
 			stateObject.dirty = false
 		}
 	}
 }
 
+/**
+@viteshan 所有的变更都是在StateObject中完成，最终才会同步到trie或者db中
+ */
 // SyncObjects syncs the changed objects to the trie
 func (self *StateDB) SyncObjects() {
 	self.trie = trie.NewSecure(self.root[:], self.db)
@@ -373,7 +414,8 @@ func (self *StateDB) SyncObjects() {
 		} else {
 			stateObject.Update()
 
-			self.UpdateStateObject(stateObject)
+			// @viteshan 这个地方会最终导致self.trie.hash()的变更
+			self.updateStateObject(stateObject)
 		}
 		stateObject.dirty = false
 	}

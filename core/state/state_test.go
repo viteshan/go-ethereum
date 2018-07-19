@@ -45,8 +45,8 @@ func (s *StateSuite) TestDump(c *checker.C) {
 	obj3.SetBalance(big.NewInt(44))
 
 	// write some of them to the trie
-	s.state.UpdateStateObject(obj1)
-	s.state.UpdateStateObject(obj2)
+	s.state.updateStateObject(obj1)
+	s.state.updateStateObject(obj2)
 
 	// check that dump contains the state objects that are in trie
 	got := string(s.state.Dump())
