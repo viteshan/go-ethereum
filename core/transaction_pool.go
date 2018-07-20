@@ -265,6 +265,7 @@ func (pool *TxPool) addTx(hash common.Hash, addr common.Address, tx *types.Trans
 		// Notify the subscribers. This event is posted in a goroutine
 		// because it's possible that somewhere during the post "Remove transaction"
 		// gets called which will then wait for the global tx pool lock and deadlock.
+		// @viteshan 广播tx, tx写入stateObject
 		go pool.eventMux.Post(TxPreEvent{tx})
 	}
 }

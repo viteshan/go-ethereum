@@ -224,6 +224,8 @@ out:
 				// Apply transaction to the pending state if we're not mining
 				if atomic.LoadInt32(&self.mining) == 0 {
 					self.mu.Lock()
+					// @viteshan 对于矿机而言，可以预先执行交易，并将交易写到stateDB中，但是并不提交，这样形成了脏的stateObject, 下一次就不用再次执行
+					// ?@viteshan 但是有个疑问，怎么知道这个交易一定就会被下次打包？ 因为GetTransactions中会取所有的pendingTx
 					self.current.commitTransactions(types.Transactions{ev.Tx}, self.gasPrice, self.proc)
 					self.mu.Unlock()
 				}
