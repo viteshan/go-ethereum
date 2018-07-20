@@ -176,6 +176,7 @@ func (self *StateTransition) preCheck() (err error) {
 		return err
 	}
 
+	// @viteshan 通过这个来确认一个tx只执行一次
 	// Make sure this transaction's nonce is correct
 	if sender.Nonce() != msg.Nonce() {
 		return NonceError(msg.Nonce(), sender.Nonce())
@@ -225,6 +226,7 @@ func (self *StateTransition) transitionState() (ret []byte, usedGas *big.Int, er
 		glog.V(logger.Core).Infoln("VM create err:", err)
 	} else {
 		// Increment the nonce for the next transaction
+		// @viteshan 通过这个地方来保证一个tx只更新一次  @preCheck
 		self.state.SetNonce(sender.Address(), sender.Nonce()+1)
 		ret, err = vmenv.Call(sender, self.To().Address(), self.data, self.gas, self.gasPrice, self.value)
 		glog.V(logger.Core).Infoln("VM call err:", err)
