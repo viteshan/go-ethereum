@@ -194,6 +194,7 @@ func (self *StateTransition) preCheck() (err error) {
 }
 
 func (self *StateTransition) transitionState() (ret []byte, usedGas *big.Int, err error) {
+	// @viteshan 确保同一个tx不会多次插入
 	if err = self.preCheck(); err != nil {
 		return
 	}
