@@ -48,10 +48,12 @@ type Transaction struct {
 type txdata struct {
 	AccountNonce    uint64
 	Price, GasLimit *big.Int
+	// @viteshan to address  参见To()
 	Recipient       *common.Address `rlp:"nil"` // nil means contract creation
 	Amount          *big.Int
 	Payload         []byte
 	V               byte     // signature
+	// @viteshan from address  参见From()
 	R, S            *big.Int // signature
 }
 

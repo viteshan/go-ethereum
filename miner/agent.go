@@ -32,6 +32,7 @@ type CpuAgent struct {
 	workCh        chan *types.Block
 	quit          chan struct{}
 	quitCurrentOp chan struct{}
+	// @viteshan 这个是worker传递过来的, 多个agent共享一个ch
 	returnCh      chan<- *types.Block
 
 	index int
@@ -80,6 +81,7 @@ out:
 				close(self.quitCurrentOp)
 			}
 			self.quitCurrentOp = make(chan struct{})
+			// @viteshan 等待一个block, 然后进行打包
 			go self.mine(block, self.quitCurrentOp)
 			self.mu.Unlock()
 		case <-self.quit:
@@ -112,6 +114,7 @@ func (self *CpuAgent) mine(block *types.Block, stop <-chan struct{}) {
 	// Mine
 	nonce, mixDigest := self.pow.Search(block, stop)
 	if nonce != 0 {
+		// @viteshan 将挖矿结果发送到returnCh中
 		self.returnCh <- block.WithMiningResult(nonce, common.BytesToHash(mixDigest))
 	} else {
 		self.returnCh <- nil

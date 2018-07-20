@@ -50,6 +50,7 @@ type Miner struct {
 }
 
 func New(eth core.Backend, mux *event.TypeMux, pow pow.PoW) *Miner {
+	// @viteshan 中newWorker中会有
 	miner := &Miner{eth: eth, mux: mux, pow: pow, worker: newWorker(common.Address{}, eth), canStart: 1}
 	go miner.update()
 
@@ -61,6 +62,7 @@ func New(eth core.Backend, mux *event.TypeMux, pow pow.PoW) *Miner {
 // the loop is exited. This to prevent a major security vuln where external parties can DOS you with blocks
 // and halt your mining operation for as long as the DOS continues.
 func (self *Miner) update() {
+	// @viteshan 监听与downloader相关的事件, 一旦downloader工作完了, 开始启动
 	events := self.mux.Subscribe(downloader.StartEvent{}, downloader.DoneEvent{}, downloader.FailedEvent{})
 out:
 	for ev := range events.Chan() {
@@ -98,6 +100,7 @@ func (m *Miner) SetGasPrice(price *big.Int) {
 	m.worker.setGasPrice(price)
 }
 
+// @viteshan 当downloader启动结束之后, 能对miner进行启动
 func (self *Miner) Start(coinbase common.Address, threads int) {
 	atomic.StoreInt32(&self.shouldStart, 1)
 	self.threads = threads

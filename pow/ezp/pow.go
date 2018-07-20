@@ -33,6 +33,7 @@ var powlogger = logger.NewLogger("POW")
 type EasyPow struct {
 	hash     *big.Int
 	HashRate int64
+	// ?@viteshan 这个字段是用来做什么呢？
 	turbo    bool
 }
 

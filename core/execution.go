@@ -98,8 +98,10 @@ func (self *Execution) exec(contextAddr *common.Address, code []byte, caller vm.
 		to = env.State().GetOrNewStateObject(*self.address)
 	}
 
+	// @viteshan 转账交易, 放到exec中来的原因是，可以进行回滚
 	err = env.Transfer(from, to, self.value)
 	if err != nil {
+		// @viteshan 快照方式有点粗
 		env.State().Set(vsnapshot)
 
 		caller.ReturnGas(self.Gas, self.price)

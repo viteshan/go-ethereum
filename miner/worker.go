@@ -250,6 +250,7 @@ func newLocalMinedBlock(blockNumber uint64, prevMinedBlocks *uint64RingBuffer) (
 
 func (self *worker) wait() {
 	for {
+		// @viteshan miner产出一个区块(找到nonce)
 		for block := range self.recv {
 			atomic.AddInt32(&self.atWork, -1)
 
