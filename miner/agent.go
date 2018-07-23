@@ -33,7 +33,7 @@ type CpuAgent struct {
 	quit          chan struct{}
 	quitCurrentOp chan struct{}
 	// @viteshan 这个是worker传递过来的, 多个agent共享一个ch
-	returnCh      chan<- *types.Block
+	returnCh chan<- *types.Block
 
 	index int
 	pow   pow.PoW
@@ -77,6 +77,8 @@ out:
 		select {
 		case block := <-self.workCh:
 			self.mu.Lock()
+			// ?@viteshan 怎么做到当一个agent得到结果时，其他agent会终止?
+			// @viteshan 如果两个agent都得出结果, 但是是不同的nonce, 会发生什么情况？
 			if self.quitCurrentOp != nil {
 				close(self.quitCurrentOp)
 			}

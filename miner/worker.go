@@ -321,6 +321,8 @@ func (self *worker) push() {
 		for _, agent := range self.agents {
 			atomic.AddInt32(&self.atWork, 1)
 
+			// @viteshan 每个agent都进行工作，看谁先找到nonce
+			// @viteshan 不会有两个block同时调用，因为push上次有lock
 			if agent.Work() != nil {
 				agent.Work() <- self.current.block
 			}
